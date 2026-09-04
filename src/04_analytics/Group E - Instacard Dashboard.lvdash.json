@@ -1,0 +1,731 @@
+{
+  "datasets": [
+    {
+      "name": "2d5bec8d",
+      "displayName": "order_products",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.instacart_gold.order_products",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "77358d78",
+      "displayName": "orders",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.instacart_gold.orders",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "7cdc70c8",
+      "displayName": "products",
+      "config": {
+        "version": "1.1",
+        "source": "workspace.instacart_gold.products",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ef39bd53",
+      "displayName": "01_most_freq_purchased_products",
+      "config": {
+        "version": "1.1",
+        "source": "-- Q1: Which products and departments are purchased most frequently?\r\n\r\n-- Top 20 Products by Order Frequency\r\nSELECT\r\n  p.product_name,\r\n  p.department,\r\n  p.aisle,\r\n  COUNT(DISTINCT op.order_id) AS times_ordered,\r\n  COUNT(*) AS total_units,\r\n  ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct\r\nFROM instacart_gold.order_products op\r\nINNER JOIN instacart_gold.products p ON op.product_id = p.product_id\r\nGROUP BY p.product_name, p.department, p.aisle\r\nORDER BY times_ordered DESC\r\nLIMIT 20",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "7349546e",
+      "displayName": "01_most_freq_purchased_dept",
+      "config": {
+        "version": "1.1",
+        "source": "-- Top Departments by Order Frequency\r\nSELECT\r\n  p.department,\r\n  COUNT(DISTINCT op.order_id) AS orders_with_dept,\r\n  COUNT(*) AS total_products_sold,\r\n  COUNT(DISTINCT op.product_id) AS unique_products,\r\n  ROUND(AVG(op.add_to_cart_order), 2) AS avg_cart_position,\r\n  ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct\r\nFROM instacart_gold.order_products op\r\nINNER JOIN instacart_gold.products p ON op.product_id = p.product_id\r\nGROUP BY p.department\r\nORDER BY orders_with_dept DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "feac72a5",
+      "displayName": "02_purch_behavior_dow",
+      "config": {
+        "version": "1.1",
+        "source": "-- Q2: How does customer purchasing behavior change by day of week and hour of day?\r\n\r\n-- Purchase patterns by Day of Week\r\nSELECT\r\n  o.order_dow,\r\n  CASE o.order_dow\r\n    WHEN 0 THEN 'Sunday'\r\n    WHEN 1 THEN 'Monday'\r\n    WHEN 2 THEN 'Tuesday'\r\n    WHEN 3 THEN 'Wednesday'\r\n    WHEN 4 THEN 'Thursday'\r\n    WHEN 5 THEN 'Friday'\r\n    WHEN 6 THEN 'Saturday'\r\n  END AS day_of_week,\r\n  COUNT(DISTINCT o.order_id) AS total_orders,\r\n  COUNT(DISTINCT o.user_id) AS unique_customers,\r\n  COUNT(op.product_id) AS total_products,\r\n  ROUND(COUNT(op.product_id) * 1.0 / COUNT(DISTINCT o.order_id), 2) AS avg_basket_size,\r\n  ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct\r\nFROM instacart_gold.orders o\r\nINNER JOIN instacart_gold.order_products op ON o.order_id = op.order_id\r\nGROUP BY o.order_dow\r\nORDER BY o.order_dow",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ddd763d3",
+      "displayName": "02_purch_behavior_hour",
+      "config": {
+        "version": "1.1",
+        "source": "-- Purchase patterns by Hour of Day\r\nSELECT\r\n  o.order_hour_of_day,\r\n  CASE\r\n    WHEN o.order_hour_of_day BETWEEN 0 AND 5 THEN 'Night (12am-6am)'\r\n    WHEN o.order_hour_of_day BETWEEN 6 AND 11 THEN 'Morning (6am-12pm)'\r\n    WHEN o.order_hour_of_day BETWEEN 12 AND 17 THEN 'Afternoon (12pm-6pm)'\r\n    WHEN o.order_hour_of_day BETWEEN 18 AND 23 THEN 'Evening (6pm-12am)'\r\n  END AS time_period,\r\n  COUNT(DISTINCT o.order_id) AS total_orders,\r\n  COUNT(DISTINCT o.user_id) AS unique_customers,\r\n  COUNT(op.product_id) AS total_products,\r\n  ROUND(COUNT(op.product_id) * 1.0 / COUNT(DISTINCT o.order_id), 2) AS avg_basket_size,\r\n  ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct\r\nFROM instacart_gold.orders o\r\nINNER JOIN instacart_gold.order_products op ON o.order_id = op.order_id\r\nGROUP BY o.order_hour_of_day\r\nORDER BY o.order_hour_of_day",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "946b326b",
+      "displayName": "02_purch_behavior_heatmap",
+      "config": {
+        "version": "1.1",
+        "source": "-- Day of Week × Hour of Day (for heatmap visualization)\r\nSELECT\r\n  CASE o.order_dow\r\n    WHEN 0 THEN 'Sunday'\r\n    WHEN 1 THEN 'Monday'\r\n    WHEN 2 THEN 'Tuesday'\r\n    WHEN 3 THEN 'Wednesday'\r\n    WHEN 4 THEN 'Thursday'\r\n    WHEN 5 THEN 'Friday'\r\n    WHEN 6 THEN 'Saturday'\r\n  END AS day_of_week,\r\n  o.order_hour_of_day,\r\n  COUNT(DISTINCT o.order_id) AS total_orders,\r\n  ROUND(COUNT(op.product_id) * 1.0 / COUNT(DISTINCT o.order_id), 2) AS avg_basket_size\r\nFROM instacart_gold.orders o\r\nINNER JOIN instacart_gold.order_products op ON o.order_id = op.order_id\r\nGROUP BY o.order_dow, o.order_hour_of_day\r\nORDER BY o.order_dow, o.order_hour_of_day",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "533fc1e6",
+      "displayName": "03_top_reorder_products",
+      "config": {
+        "version": "1.1",
+        "source": "-- Q3: Which products have the highest reorder behavior?\r\n\r\n-- Top 20 Products by Reorder Rate (minimum 100 orders)\r\nSELECT\r\n  p.product_name,\r\n  p.department,\r\n  p.aisle,\r\n  COUNT(*) AS total_units_sold,\r\n  SUM(op.reordered) AS times_reordered,\r\n  ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct,\r\n  COUNT(DISTINCT op.order_id) AS unique_orders\r\nFROM instacart_gold.order_products op\r\nINNER JOIN instacart_gold.products p ON op.product_id = p.product_id\r\nGROUP BY p.product_name, p.department, p.aisle\r\nHAVING COUNT(DISTINCT op.order_id) >= 100  -- Filter for statistical significance\r\nORDER BY reorder_rate_pct DESC, unique_orders DESC\r\nLIMIT 10",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ffbfe098",
+      "displayName": "03_top_reorder_dept",
+      "config": {
+        "version": "1.1",
+        "source": "-- Reorder Behavior by Department\r\nSELECT\r\n  p.department,\r\n  COUNT(*) AS total_units_sold,\r\n  SUM(op.reordered) AS times_reordered,\r\n  ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct,\r\n  COUNT(DISTINCT op.product_id) AS unique_products,\r\n  COUNT(DISTINCT op.order_id) AS unique_orders\r\nFROM instacart_gold.order_products op\r\nINNER JOIN instacart_gold.products p ON op.product_id = p.product_id\r\nGROUP BY p.department\r\nORDER BY reorder_rate_pct DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "41ca9495",
+      "displayName": "04_customer_segmentation",
+      "config": {
+        "version": "1.1",
+        "source": "-- Q4: Additional Business Question - What is the customer loyalty profile?\r\n-- Analyze customer behavior patterns to segment users by engagement and value\r\n\r\n-- Customer Segmentation Analysis\r\nWITH customer_metrics AS (\r\n  SELECT\r\n    o.user_id,\r\n    COUNT(DISTINCT o.order_id) AS total_orders,\r\n    COUNT(op.product_id) AS total_products,\r\n    ROUND(COUNT(op.product_id) * 1.0 / COUNT(DISTINCT o.order_id), 2) AS avg_basket_size,\r\n    ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct,\r\n    ROUND(AVG(o.days_since_prior_order), 1) AS avg_days_between_orders,\r\n    MAX(o.order_number) AS customer_tenure_orders\r\n  FROM instacart_gold.orders o\r\n  INNER JOIN instacart_gold.order_products op ON o.order_id = op.order_id\r\n  WHERE o.days_since_prior_order IS NOT NULL\r\n  GROUP BY o.user_id\r\n),\r\ncustomer_segments AS (\r\n  SELECT\r\n    user_id,\r\n    total_orders,\r\n    total_products,\r\n    avg_basket_size,\r\n    reorder_rate_pct,\r\n    avg_days_between_orders,\r\n    customer_tenure_orders,\r\n    CASE\r\n      WHEN total_orders >= 50 AND reorder_rate_pct >= 60 THEN 'VIP Loyalist'\r\n      WHEN total_orders >= 30 AND reorder_rate_pct >= 50 THEN 'Loyal Regular'\r\n      WHEN total_orders >= 15 THEN 'Regular Customer'\r\n      WHEN total_orders >= 5 THEN 'Occasional Shopper'\r\n      ELSE 'New Customer'\r\n    END AS customer_segment\r\n  FROM customer_metrics\r\n)\r\nSELECT\r\n  customer_segment,\r\n  COUNT(*) AS num_customers,\r\n  ROUND(AVG(total_orders), 1) AS avg_orders,\r\n  ROUND(AVG(total_products), 1) AS avg_total_products,\r\n  ROUND(AVG(avg_basket_size), 2) AS avg_basket_size,\r\n  ROUND(AVG(reorder_rate_pct), 2) AS avg_reorder_rate_pct,\r\n  ROUND(AVG(avg_days_between_orders), 1) AS avg_days_between_orders,\r\n  ROUND(SUM(total_products) * 100.0 / (SELECT SUM(total_products) FROM customer_segments), 2) AS pct_total_revenue\r\nFROM customer_segments\r\nGROUP BY customer_segment\r\nORDER BY avg_orders DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "817db546",
+      "displayName": "04_customer_segment_dept",
+      "config": {
+        "version": "1.1",
+        "source": "-- Department Preferences by Customer Segment\r\nWITH customer_metrics AS (\r\n  SELECT\r\n    o.user_id,\r\n    COUNT(DISTINCT o.order_id) AS total_orders,\r\n    ROUND(SUM(op.reordered) * 100.0 / COUNT(*), 2) AS reorder_rate_pct\r\n  FROM instacart_gold.orders o\r\n  INNER JOIN instacart_gold.order_products op ON o.order_id = op.order_id\r\n  GROUP BY o.user_id\r\n),\r\ncustomer_segments AS (\r\n  SELECT\r\n    user_id,\r\n    CASE\r\n      WHEN total_orders >= 50 AND reorder_rate_pct >= 60 THEN 'VIP Loyalist'\r\n      WHEN total_orders >= 30 AND reorder_rate_pct >= 50 THEN 'Loyal Regular'\r\n      WHEN total_orders >= 15 THEN 'Regular Customer'\r\n      WHEN total_orders >= 5 THEN 'Occasional Shopper'\r\n      ELSE 'New Customer'\r\n    END AS customer_segment\r\n  FROM customer_metrics\r\n)\r\nSELECT\r\n  cs.customer_segment,\r\n  p.department,\r\n  COUNT(op.product_id) AS products_purchased,\r\n  ROUND(COUNT(op.product_id) * 100.0 / SUM(COUNT(op.product_id)) OVER (PARTITION BY cs.customer_segment), 2) AS pct_of_segment_purchases\r\nFROM instacart_gold.orders o\r\nINNER JOIN customer_segments cs ON o.user_id = cs.user_id\r\nINNER JOIN instacart_gold.order_products op ON o.order_id = op.order_id\r\nINNER JOIN instacart_gold.products p ON op.product_id = p.product_id\r\nGROUP BY cs.customer_segment, p.department\r\nQUALIFY ROW_NUMBER() OVER (PARTITION BY cs.customer_segment ORDER BY products_purchased DESC) <= 5\r\nORDER BY cs.customer_segment, products_purchased DESC",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "f6ad6629",
+      "displayName": "Main",
+      "layout": [
+        {
+          "widget": {
+            "name": "5db92223",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ef39bd53",
+                  "fields": [
+                    {
+                      "name": "sum(times_ordered)",
+                      "expression": "SUM(`times_ordered`)"
+                    },
+                    {
+                      "name": "product_name",
+                      "expression": "`product_name`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": false,
+                "showDescription": false
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(times_ordered)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "product_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "14128030",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Top 20 Products by Order Frequency"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "e706caed",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Department Rankings by Order Frequency"
+              ]
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "6e7e94b3",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7349546e",
+                  "fields": [
+                    {
+                      "name": "department",
+                      "expression": "`department`"
+                    },
+                    {
+                      "name": "sum(total_products_sold)",
+                      "expression": "SUM(`total_products_sold`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "department",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_products_sold)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": false
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 1,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "8daae823",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Purchasing Behavior Heatmap (Day of Week x Hour)"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 12,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "9167af4f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "946b326b",
+                  "fields": [
+                    {
+                      "name": "sum(total_orders)",
+                      "expression": "SUM(`total_orders`)"
+                    },
+                    {
+                      "name": "order_hour_of_day",
+                      "expression": "`order_hour_of_day`"
+                    },
+                    {
+                      "name": "day_of_week",
+                      "expression": "`day_of_week`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "order_hour_of_day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "day_of_week",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Sunday",
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday"
+                      ]
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(total_orders)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "2214f484",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Top Products by Reorder Rate"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "8e98299d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "533fc1e6",
+                  "fields": [
+                    {
+                      "name": "reorder_rate_pct",
+                      "expression": "`reorder_rate_pct`"
+                    },
+                    {
+                      "name": "product_name",
+                      "expression": "`product_name`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "reorder_rate_pct",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "product_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "8cd5aa7b",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Top Departments by Reorder Rate"
+              ]
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 15,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "c0caf9a8",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ffbfe098",
+                  "fields": [
+                    {
+                      "name": "department",
+                      "expression": "`department`"
+                    },
+                    {
+                      "name": "reorder_rate_pct",
+                      "expression": "`reorder_rate_pct`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "department",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "reorder_rate_pct",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 16,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "f7826d2f",
+            "multilineTextboxSpec": {
+              "lines": [
+                "### Department Preferences by Customer Segmentation"
+              ]
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 22,
+            "width": 6,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "868326bd",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "817db546",
+                  "fields": [
+                    {
+                      "name": "customer_segment",
+                      "expression": "`customer_segment`"
+                    },
+                    {
+                      "name": "department",
+                      "expression": "`department`"
+                    },
+                    {
+                      "name": "avg(pct_of_segment_purchases)",
+                      "expression": "AVG(`pct_of_segment_purchases`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "department",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(pct_of_segment_purchases)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "customer_segment",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 23,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
