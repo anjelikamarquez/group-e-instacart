@@ -52,9 +52,9 @@ The project uses the following Instacart CSV files:
   ----------------------------- --------------------------------------
   - `aisles.csv`                  Product aisle reference data
   -  `departments.csv`             Product department reference data
-  `products.csv`                Product information and category IDs
-  `orders.csv`                  Order-level information
-  `order_products__prior.csv`   Products included in prior orders
+  - `products.csv`                Product information and category IDs
+  - `orders.csv`                  Order-level information
+  - `order_products__prior.csv`   Products included in prior orders
 
 The files were ingested from a Databricks Volume into the Bronze layer.
 
