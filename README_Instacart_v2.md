@@ -158,35 +158,27 @@ The notebook uses Databricks SQL `read_files()` to read the CSV files and applie
 
 # 3. Data Profiling
 
-A dedicated profiling step was added before the Silver transformation.
+### Data Profiling Results
 
-A temporary `data_quality_report` view summarizes the initial state of the Bronze tables.
+Data profiling was performed to check the completeness, uniqueness, and
+value ranges of the Bronze tables.
 
-The profiling checks:
+The profiling checked:
 
-- Total row count
-- NULL count
-- NULL percentage
-- Distinct value count
-- Distinct percentage
-- Data type
-- Minimum value
-- Maximum value
+- Number of rows
+- NULL values
+- Distinct values
+- Minimum and maximum values
+- Data types
 
-### Key Findings
+For example, for the `product_name` column, the profiling showed:
 
-| Field | Finding |
-|---|---|
-| `orders.order_id` | 3,421,083 unique values; 0 NULL |
-| `products.product_id` | 49,688 unique values; 0 NULL |
-| `orders.order_dow` | Range 0–6 |
-| `orders.order_hour_of_day` | Range 0–23 |
-| `order_products.reordered` | Values 0 or 1 |
-| `orders.days_since_prior_order` | 206,209 NULL values (6.03%) |
-| `products.aisle_id` | 1 NULL value |
-| `products.department_id` | 1 NULL value |
+- **Minimum:** `"Constant Comment" Black Tea`
+- **Maximum:** `with a Splash of Pineapple Coconut Water`
 
-The NULL values in `days_since_prior_order` are meaningful because they can indicate a customer's first recorded order.
+Because `product_name` is a text column, these values represent the
+alphabetical minimum and maximum product names. They do not indicate a
+data-quality problem.
 
 ---
 
