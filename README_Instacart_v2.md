@@ -8,7 +8,7 @@ The pipeline transforms raw CSV files through:
 
 **Bronze → Data Profiling & Quality Checks → Silver → Gold → Analytics**
 
-The latest version of the notebook adds a dedicated data profiling, anomaly-checking, and validation stage before the Silver layer. The cleaned data is then modeled into a simplified **Star Schema** for business intelligence analysis.
+This notebook has a dedicated data profiling, anomaly-checking, and validation stage before the Silver layer.
 
 The main goals are to:
 
@@ -34,22 +34,22 @@ The main goals are to:
                               │
                               ▼
                   ┌────────────────────────┐
-                  │ DATA PROFILING          │
-                  │ • Row counts            │
-                  │ • NULL analysis         │
-                  │ • Distinct values       │
-                  │ • Numeric ranges        │
+                  │ DATA PROFILING         │
+                  │ • Row counts           │
+                  │ • NULL analysis        │
+                  │ • Distinct values      │
+                  │ • Numeric ranges       │
                   └───────────┬────────────┘
                               │
                               ▼
                   ┌────────────────────────┐
-                  │ DATA QUALITY VALIDATION │
-                  │ • PK uniqueness         │
-                  │ • NULL checks            │
-                  │ • Duplicate rows        │
-                  │ • Value/range checks    │
-                  │ • Referential integrity │
-                  │ • Anomaly check          │
+                  │ DATA QUALITY VALIDATION│
+                  │ • PK uniqueness        │
+                  │ • NULL checks          │
+                  │ • Duplicate rows       │
+                  │ • Value/range checks   │
+                  │ • Referential integrity│
+                  │ • Anomaly check        │
                   └───────────┬────────────┘
                               │
                               ▼
@@ -81,23 +81,23 @@ The main goals are to:
 
 The project uses five source CSV files:
 
-| Source File | Purpose |
-|---|---|
-| `aisles.csv` | Aisle/category lookup |
-| `departments.csv` | Department lookup |
-| `products.csv` | Product information and category IDs |
-| `orders.csv` | Order-level and customer purchasing information |
-| `order_products__prior.csv` | Products included in orders and reorder information |
+ Source File | Purpose 
+
+- `aisles.csv` | Aisle/category lookup 
+- `departments.csv` | Department lookup 
+- `products.csv` | Product information and category IDs 
+- `orders.csv` | Order-level and customer purchasing information 
+- `order_products__prior.csv` | Products included in orders and reorder information 
 
 ### Source Row Counts
 
-| Table | Rows |
-|---|---:|
-| `aisles` | 134 |
-| `departments` | 21 |
-| `products` | 49,688 |
-| `orders` | 3,421,083 |
-| `order_products` | 32,434,489 |
+ Table | Rows 
+
+- `aisles` | 134 
+- `departments` | 21 
+- `products` | 49,688 
+- `orders` | 3,421,083 
+- `order_products` | 32,434,489 
 
 ---
 
